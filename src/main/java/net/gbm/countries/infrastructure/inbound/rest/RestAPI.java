@@ -8,8 +8,6 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 import net.gbm.countries.application.interfaces.inbound.ProcessRequest;
-import net.gbm.countries.infrastructure.inbound.rest.dto.request.RequestDTO;
-import net.gbm.countries.infrastructure.inbound.rest.dto.response.ResponseDTO;
 import net.gbm.countries.utils.defaults.CodeMessage;
 import net.gbm.countries.utils.errors.dtos.ErrorResponse;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
@@ -20,19 +18,18 @@ import org.slf4j.MDC;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 
-@Path("/scaffold")
-@Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
+@Path("/countries")
+@Produces(MediaType.TEXT_PLAIN)
+@Consumes(MediaType.TEXT_PLAIN)
 @Slf4j
 public class RestAPI {
     @Inject
     ProcessRequest processRequest;
-    @POST
+    @GET
+    @Path("/{country}")
     @APIResponses({
             @APIResponse(responseCode = CodeMessage.Code200,
-                    description = "Reservation confirmed",
-                    content = @Content(mediaType = APPLICATION_JSON,
-                            schema = @Schema(implementation = ResponseDTO.class))
+                    description = "Reservation confirmed"
             ),
             @APIResponse(
                     responseCode = "400",
@@ -47,10 +44,10 @@ public class RestAPI {
                             schema = @Schema(implementation = ErrorResponse.class))
             )
     })
-    public Response postRequest(@Valid RequestDTO request) {
-        log.info("Request: {}", request);
+    public Response getRequest(@PathParam("country") String country) {
+        log.info("Request: {}", country);
 
-        return Response.ok(processRequest.process(request))
+        return Response.ok(processRequest.process(country))
                 .header("TRNID", MDC.get("trnID"))
                 .build();
     }
